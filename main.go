@@ -8,9 +8,9 @@ import (
 	"os"
 	"time"
 
-	"github.com/senzing/g2-sdk-go-base/g2config"
-	"github.com/senzing/g2-sdk-go-base/g2configmgr"
-	"github.com/senzing/g2-sdk-go-base/g2engine"
+	"github.com/senzing/g2-sdk-go-mock/g2config"
+	"github.com/senzing/g2-sdk-go-mock/g2configmgr"
+	"github.com/senzing/g2-sdk-go-mock/g2engine"
 	"github.com/senzing/g2-sdk-go/g2api"
 	"github.com/senzing/go-common/g2engineconfigurationjson"
 	"github.com/senzing/go-common/truthset"
@@ -137,5 +137,5 @@ func main() {
 	sleepTime := time.Duration(2)
 	fmt.Printf("-------------------  Sleeping %d seconds for Observers -------------------\n", sleepTime)
 	time.Sleep(sleepTime * time.Second)
-	fmt.Printf("-------------------  Completed running base implementation --------------\n")
+	fmt.Printf("-------------------  Completed running mock implementation --------------\n")
 }
