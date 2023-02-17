@@ -1,4 +1,4 @@
-# Makefile that builds servegrpc, a "go" program.
+# Makefile that builds simple "go" program examples.
 
 # "Simple expanded" variables (':=')
 
@@ -7,14 +7,9 @@ PROGRAM_NAME := $(shell basename `git rev-parse --show-toplevel`)
 MAKEFILE_PATH := $(abspath $(lastword $(MAKEFILE_LIST)))
 MAKEFILE_DIRECTORY := $(dir $(MAKEFILE_PATH))
 TARGET_DIRECTORY := $(MAKEFILE_DIRECTORY)/target
-DOCKER_CONTAINER_NAME := $(PROGRAM_NAME)
-DOCKER_IMAGE_NAME := senzing/$(PROGRAM_NAME)
-DOCKER_BUILD_IMAGE_NAME := $(DOCKER_IMAGE_NAME)-build
 BUILD_VERSION := $(shell git describe --always --tags --abbrev=0 --dirty  | sed 's/v//')
 BUILD_TAG := $(shell git describe --always --tags --abbrev=0  | sed 's/v//')
 BUILD_ITERATION := $(shell git log $(BUILD_TAG)..HEAD --oneline | wc -l | sed 's/^ *//')
-GIT_REMOTE_URL := $(shell git config --get remote.origin.url)
-GO_PACKAGE_NAME := $(shell echo $(GIT_REMOTE_URL) | sed -e 's|^git@github.com:|github.com/|' -e 's|\.git$$||' -e 's|Senzing|senzing|')
 
 # Recursive assignment ('=')
 
@@ -54,15 +49,9 @@ dependencies:
 test:
 	@go test -v -p 1 ./...
 
-
 # -----------------------------------------------------------------------------
 # Run
 # -----------------------------------------------------------------------------
-
-.PHONY: run
-run:
-	@go run main.go
-
 
 .PHONY: run-base
 run-base:
