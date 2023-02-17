@@ -74,3 +74,64 @@ $ diff main.go.mock main.go.base
 ---
 >   fmt.Printf("-------------------  Completed running base implementation --------------\n")
 ```
+
+## Development
+
+### Install Go
+
+1. See Go's [Download and install](https://go.dev/doc/install)
+
+### Install Git repository
+
+1. Identify git repository.
+
+    ```console
+    export GIT_ACCOUNT=docktermj
+    export GIT_REPOSITORY=tour-of-senzing-go
+    export GIT_ACCOUNT_DIR=~/${GIT_ACCOUNT}.git
+    export GIT_REPOSITORY_DIR="${GIT_ACCOUNT_DIR}/${GIT_REPOSITORY}"
+
+    ```
+
+1. Using the environment variables values just set, follow steps in
+   [clone-repository](https://github.com/Senzing/knowledge-base/blob/main/HOWTO/clone-repository.md) to install the Git repository.
+
+### Run Mock
+
+1. Run Mock implementation.
+
+    ```console
+    cd ${GIT_REPOSITORY_DIR}
+    make run-mock
+
+    ```
+
+### Run gRPC
+
+1. To run a Senzing gRPC server, visit
+   [Senzing/servegrpc](https://github.com/Senzing/servegrpc).
+
+1. Run gRPC implementation.
+
+    ```console
+    cd ${GIT_REPOSITORY_DIR}
+    make run-gRPC
+
+    ```
+
+### Run Base
+
+1. Since the Senzing library is a prerequisite, it must be installed first.
+    1. Verify Senzing C shared objects, configuration, and SDK header files are installed.
+    1. `/opt/senzing/g2/lib`
+    1. `/opt/senzing/g2/sdk/c`
+    1. `/etc/opt/senzing`
+
+1. If not installed, see
+   [How to Install Senzing for Go Development](https://github.com/Senzing/knowledge-base/blob/main/HOWTO/install-senzing-for-go-development.md).
+
+1. Run Mock implementation.
+
+    ```console
+    cd ${GIT_REPOSITORY_DIR}
+    make run-base
