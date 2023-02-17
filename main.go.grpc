@@ -1,0 +1,163 @@
+/*
+ */
+package main
+
+import (
+	"context"
+	"fmt"
+	"os"
+	"time"
+
+	"github.com/senzing/g2-sdk-go-grpc/g2config"
+	"github.com/senzing/g2-sdk-go-grpc/g2configmgr"
+	"github.com/senzing/g2-sdk-go-grpc/g2engine"
+	"github.com/senzing/g2-sdk-go/g2api"
+	g2configpb "github.com/senzing/g2-sdk-proto/go/g2config"
+	g2configmgrpb "github.com/senzing/g2-sdk-proto/go/g2configmgr"
+	g2enginepb "github.com/senzing/g2-sdk-proto/go/g2engine"
+	"github.com/senzing/go-common/truthset"
+	"github.com/senzing/go-observing/observer"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
+)
+
+var (
+	grpcAddress    = "localhost:8258"
+	grpcConnection *grpc.ClientConn
+)
+
+// ----------------------------------------------------------------------------
+// Internal methods
+// ----------------------------------------------------------------------------
+
+// Create a connection to the gRPC server.
+func getGrpcConnection() *grpc.ClientConn {
+	var err error = nil
+	if grpcConnection == nil {
+		grpcConnection, err = grpc.Dial(grpcAddress, grpc.WithTransportCredentials(insecure.NewCredentials()))
+		if err != nil {
+			fmt.Printf("Did not connect: %v\n", err)
+		}
+		//		defer grpcConnection.Close()
+	}
+	return grpcConnection
+}
+
+// Output the error and exit program.
+func errorExit(message string, err error) {
+	fmt.Printf("Exit with error: %s   Error: %v\n", message, err)
+	os.Exit(1)
+}
+
+// Add the CUSTOMERS Datasource.
+func loadDatasources(ctx context.Context, g2Config g2api.G2config, g2Configmgr g2api.G2configmgr, g2Engine g2api.G2engine) {
+	now := time.Now()
+
+	// Using G2Config: Create a default configuration in memory.
+
+	configHandle, err := g2Config.Create(ctx)
+	if err != nil {
+		errorExit("", err)
+	}
+
+	// Using G2Config: Add the CUSTOMERS data source to in-memory configuration.
+
+	datasourceNames := []string{"CUSTOMERS"}
+	for _, datasourceName := range datasourceNames {
+		datasource := truthset.TruthsetDataSources[datasourceName]
+		_, err := g2Config.AddDataSource(ctx, configHandle, datasource.Json)
+		if err != nil {
+			errorExit("", err)
+		}
+	}
+
+	// Using G2Config: Persist configuration to a string.
+
+	configStr, err := g2Config.Save(ctx, configHandle)
+	if err != nil {
+		errorExit("", err)
+	}
+
+	// Using G2Configmgr: Persist configuration string to database.
+
+	configComments := fmt.Sprintf("Created by g2diagnostic_test at %s", now.UTC())
+	configID, err := g2Configmgr.AddConfig(ctx, configStr, configComments)
+	if err != nil {
+		errorExit("", err)
+	}
+
+	// Using G2Configmgr: Set new configuration as the default.
+
+	err = g2Configmgr.SetDefaultConfigID(ctx, configID)
+	if err != nil {
+		errorExit("", err)
+	}
+
+	// Using G2Engine: Update the G2Engine to use the new configuration.
+
+	err = g2Engine.Reinit(ctx, configID)
+	if err != nil {
+		errorExit("", err)
+	}
+}
+
+// Load the Senzing CUSTOMERS Truth Set.
+func loadRecords(ctx context.Context, g2Engine g2api.G2engine) {
+	loadId := "Test load"
+	for _, record := range truthset.CustomerRecords {
+		err := g2Engine.AddRecord(ctx, record.DataSource, record.Id, record.Json, loadId)
+		if err != nil {
+			errorExit("", err)
+		}
+	}
+}
+
+// ----------------------------------------------------------------------------
+// Main
+// ----------------------------------------------------------------------------
+
+func main() {
+	ctx := context.TODO()
+
+	// Create an observer.
+
+	myObserver := &observer.ObserverNull{
+		Id: "My Observer",
+	}
+
+	// Initialize gRPC connection.
+
+	grpcConnection := getGrpcConnection()
+
+	// Create a Senzing G2Config, G2Configmgr, and G2Engine objects and register the observer.
+
+	g2Config := &g2config.G2config{
+		GrpcClient: g2configpb.NewG2ConfigClient(grpcConnection),
+	}
+	g2Config.RegisterObserver(ctx, myObserver)
+
+	g2Configmgr := &g2configmgr.G2configmgr{
+		GrpcClient: g2configmgrpb.NewG2ConfigMgrClient(grpcConnection),
+	}
+	g2Configmgr.RegisterObserver(ctx, myObserver)
+
+	g2Engine := &g2engine.G2engine{
+		GrpcClient: g2enginepb.NewG2EngineClient(grpcConnection),
+	}
+	g2Engine.RegisterObserver(ctx, myObserver)
+
+	// Load DataSources.
+
+	loadDatasources(ctx, g2Config, g2Configmgr, g2Engine)
+
+	// Load records.
+
+	loadRecords(ctx, g2Engine)
+
+	// Let observer finish.
+
+	sleepTime := time.Duration(2)
+	fmt.Printf("-------------------  Sleeping %d seconds for Observers -------------------\n", sleepTime)
+	time.Sleep(sleepTime * time.Second)
+	fmt.Printf("-------------------  Completed running grpc Implementation --------------\n")
+}
