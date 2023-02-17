@@ -125,5 +125,5 @@ func main() {
 	sleepTime := time.Duration(2)
 	fmt.Printf("-------------------  Sleeping %d seconds for Observers -------------------\n", sleepTime)
 	time.Sleep(sleepTime * time.Second)
-
+	fmt.Printf("-------------------  Completed running mock Implementation ---------------\n", sleepTime)
 }

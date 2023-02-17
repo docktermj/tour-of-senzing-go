@@ -74,6 +74,24 @@ run-base:
 	@go mod tidy
 	@go run main.go
 
+
+.PHONY: run-grpc
+run-grpc:
+	@rm -rf /tmp/sqlite
+	@cp main.go.grpc main.go
+	@go get -t -u ./...
+	@go mod tidy
+	@go run main.go
+
+
+.PHONY: run-mock
+run-mock:
+	@rm -rf /tmp/sqlite
+	@cp main.go.mock main.go
+	@go get -t -u ./...
+	@go mod tidy
+	@go run main.go
+
 # -----------------------------------------------------------------------------
 # Utility targets
 # -----------------------------------------------------------------------------
