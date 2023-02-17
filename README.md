@@ -25,23 +25,35 @@ They are:
 
 1. **Base:** [g2-sdk-go-base](https://pkg.go.dev/github.com/senzing/g2-sdk-go-base) - for
    calling Senzing Go SDK APIs natively.
+1. **gRPC** [g2-sdk-go-grpc](https://pkg.go.dev/github.com/senzing/g2-sdk-go-grpc) - for
+   calling Senzing SDK APIs over [gRPC](https://grpc.io/).
 1. **Mock:** [g2-sdk-go-mock](https://pkg.go.dev/github.com/senzing/g2-sdk-go-mock) - a
    [test double](https://en.wikipedia.org/wiki/Test_double)
    used for unit testing calls to the Senzing Go SDK.
    It can also be used for programming against the Senzing Go SDK without
    installing the Senzing C libraries.
-1. **gRPC** [g2-sdk-go-grpc](https://pkg.go.dev/github.com/senzing/g2-sdk-go-grpc) - for
-   calling Senzing SDK APIs over [gRPC](https://grpc.io/).
 
 ## Differences
 
-To see differences in the 3 implemenations, mock, grpc, and base, visit
+To see differences in programming to the 3 implemenations, base, grpc, and mock, visit
 [DiffNow](https://www.diffnow.com/compare-urls),
 and compare any of these URLs:
 
 1. **Base:** <https://raw.githubusercontent.com/docktermj/tour-of-senzing-go/main/main.go.base>
-1. **Mock:** <https://raw.githubusercontent.com/docktermj/tour-of-senzing-go/main/main.go.mock>
 1. **gRPC:** <https://raw.githubusercontent.com/docktermj/tour-of-senzing-go/main/main.go.grpc>
+1. **Mock:** <https://raw.githubusercontent.com/docktermj/tour-of-senzing-go/main/main.go.mock>
+
+Notice that the differences among the files are mostly how the G2* objects are created.
+Once the object is created, it is passed to functions that have
+parameters which use the Senzing interfaces defined by the imported
+`github.com/senzing/g2-sdk-go/g2api` package.
+Example:
+
+```go
+import "github.com/senzing/g2-sdk-go/g2api"
+
+func loadDatasources(ctx context.Context, g2Config g2api.G2config, g2Configmgr g2api.G2configmgr, g2Engine g2api.G2engine) {
+```
 
 ### main.go.mock vs. main.go.base
 
