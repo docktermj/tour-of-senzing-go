@@ -1,0 +1,54 @@
+/*
+ */
+package main
+
+import (
+	"context"
+	"fmt"
+	"time"
+
+	"github.com/senzing/g2-sdk-go-mock/g2engine"
+	"github.com/senzing/g2-sdk-go/g2api"
+	"github.com/senzing/go-common/truthset"
+	"github.com/senzing/go-observing/observer"
+)
+
+func loadRecords(ctx context.Context, g2Engine g2api.G2engine) {
+	loadId := "Test load"
+	for _, record := range truthset.CustomerRecords {
+		err := g2Engine.AddRecord(ctx, record.DataSource, record.Id, record.Json, loadId)
+		if err != nil {
+			fmt.Printf("Error in DataSource: %s; RecordID: %s; Error: %v", record.DataSource, record.Id, err)
+		}
+	}
+}
+
+// ----------------------------------------------------------------------------
+// Main
+// ----------------------------------------------------------------------------
+
+func main() {
+	ctx := context.TODO()
+
+	// Create an observer.
+
+	myObserver := &observer.ObserverNull{
+		Id: "My Observer",
+	}
+
+	// Create a Senzing G2Engine object and register the observer.
+
+	g2Engine := g2engine.G2engine{}
+	g2Engine.RegisterObserver(ctx, myObserver)
+
+	// Load records.
+
+	loadRecords(ctx, &g2Engine)
+
+	// Let observer finish.
+
+	sleepTime := time.Duration(2)
+	fmt.Printf("-------------------  Sleeping %d seconds for Observers -------------------\n", sleepTime)
+	time.Sleep(sleepTime * time.Second)
+
+}
