@@ -8,11 +8,10 @@ import (
 	"os"
 	"time"
 
-	"github.com/senzing/g2-sdk-go-base/g2config"
-	"github.com/senzing/g2-sdk-go-base/g2configmgr"
-	"github.com/senzing/g2-sdk-go-base/g2engine"
+	"github.com/senzing/g2-sdk-go-mock/g2config"
+	"github.com/senzing/g2-sdk-go-mock/g2configmgr"
+	"github.com/senzing/g2-sdk-go-mock/g2engine"
 	"github.com/senzing/g2-sdk-go/g2api"
-	"github.com/senzing/go-common/g2engineconfigurationjson"
 	"github.com/senzing/go-common/truthset"
 	"github.com/senzing/go-observing/observer"
 )
@@ -104,25 +103,14 @@ func main() {
 	}
 
 	// Create a Senzing G2Config, G2Configmgr, and G2Engine objects and register the observer.
-
-	moduleName := "Test module name"
-	verboseLogging := 0 // 0 for no Senzing logging; 1 for logging
-	iniParams, err := g2engineconfigurationjson.BuildSimpleSystemConfigurationJson("")
-	if err != nil {
-		errorExit("", err)
-	}
-
 	g2Config := &g2config.G2config{}
 	g2Config.RegisterObserver(ctx, myObserver)
-	g2Config.Init(ctx, moduleName, iniParams, verboseLogging)
 
 	g2Configmgr := &g2configmgr.G2configmgr{}
 	g2Configmgr.RegisterObserver(ctx, myObserver)
-	g2Configmgr.Init(ctx, moduleName, iniParams, verboseLogging)
 
 	g2Engine := &g2engine.G2engine{}
 	g2Engine.RegisterObserver(ctx, myObserver)
-	g2Engine.Init(ctx, moduleName, iniParams, verboseLogging)
 
 	// Load DataSources.
 
@@ -137,5 +125,5 @@ func main() {
 	sleepTime := time.Duration(2)
 	fmt.Printf("-------------------  Sleeping %d seconds for Observers -------------------\n", sleepTime)
 	time.Sleep(sleepTime * time.Second)
-	fmt.Printf("-------------------  Completed running base implementation ---------------\n", sleepTime)
+	fmt.Printf("-------------------  Completed running mock Implementation --------------\n")
 }
