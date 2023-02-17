@@ -8,17 +8,40 @@ import (
 	"os"
 	"time"
 
-	"github.com/senzing/g2-sdk-go-mock/g2config"
-	"github.com/senzing/g2-sdk-go-mock/g2configmgr"
-	"github.com/senzing/g2-sdk-go-mock/g2engine"
+	"github.com/senzing/g2-sdk-go-grpc/g2config"
+	"github.com/senzing/g2-sdk-go-grpc/g2configmgr"
+	"github.com/senzing/g2-sdk-go-grpc/g2engine"
 	"github.com/senzing/g2-sdk-go/g2api"
+	g2configpb "github.com/senzing/g2-sdk-proto/go/g2config"
+	g2configmgrpb "github.com/senzing/g2-sdk-proto/go/g2configmgr"
+	g2enginepb "github.com/senzing/g2-sdk-proto/go/g2engine"
 	"github.com/senzing/go-common/truthset"
 	"github.com/senzing/go-observing/observer"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
+)
+
+var (
+	grpcAddress    = "localhost:8258"
+	grpcConnection *grpc.ClientConn
 )
 
 // ----------------------------------------------------------------------------
 // Internal methods
 // ----------------------------------------------------------------------------
+
+// Create a connection to the gRPC server.
+func getGrpcConnection() *grpc.ClientConn {
+	var err error = nil
+	if grpcConnection == nil {
+		grpcConnection, err = grpc.Dial(grpcAddress, grpc.WithTransportCredentials(insecure.NewCredentials()))
+		if err != nil {
+			fmt.Printf("Did not connect: %v\n", err)
+		}
+		//		defer grpcConnection.Close()
+	}
+	return grpcConnection
+}
 
 // Output the error and exit program.
 func errorExit(message string, err error) {
@@ -102,14 +125,25 @@ func main() {
 		Id: "My Observer",
 	}
 
+	// Initialize gRPC connection.
+
+	grpcConnection := getGrpcConnection()
+
 	// Create a Senzing G2Config, G2Configmgr, and G2Engine objects and register the observer.
-	g2Config := &g2config.G2config{}
+
+	g2Config := &g2config.G2config{
+		GrpcClient: g2configpb.NewG2ConfigClient(grpcConnection),
+	}
 	g2Config.RegisterObserver(ctx, myObserver)
 
-	g2Configmgr := &g2configmgr.G2configmgr{}
+	g2Configmgr := &g2configmgr.G2configmgr{
+		GrpcClient: g2configmgrpb.NewG2ConfigMgrClient(grpcConnection),
+	}
 	g2Configmgr.RegisterObserver(ctx, myObserver)
 
-	g2Engine := &g2engine.G2engine{}
+	g2Engine := &g2engine.G2engine{
+		GrpcClient: g2enginepb.NewG2EngineClient(grpcConnection),
+	}
 	g2Engine.RegisterObserver(ctx, myObserver)
 
 	// Load DataSources.
