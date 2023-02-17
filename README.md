@@ -53,6 +53,8 @@ Example:
 import "github.com/senzing/g2-sdk-go/g2api"
 
 func loadDatasources(ctx context.Context, g2Config g2api.G2config, g2Configmgr g2api.G2configmgr, g2Engine g2api.G2engine) {
+    :
+}
 ```
 
 ### main.go.mock vs. main.go.base
