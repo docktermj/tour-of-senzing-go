@@ -4,7 +4,7 @@ go 1.20
 
 require (
 	github.com/senzing/g2-sdk-go v0.4.0
-	github.com/senzing/g2-sdk-go-mock v0.1.0
+	github.com/senzing/g2-sdk-go-base v0.1.0
 	github.com/senzing/go-common v0.1.1
 	github.com/senzing/go-observing v0.1.1
 )
